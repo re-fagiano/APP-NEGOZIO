@@ -1,0 +1,16 @@
+{
+  "name": "app-negozio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Gestionale ticket e magazzino per negozio con persistenza locale, backup e dashboard operativa.",
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/build.js",
+    "preview": "node scripts/dev-server.js dist 4173",
+    "test": "node --test",
+    "lint": "node scripts/static-check.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
