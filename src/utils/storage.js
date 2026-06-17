@@ -1,5 +1,3 @@
-import { VALID_PRIORITIES, VALID_STATUSES } from './validation.js';
-
 export const STORAGE_KEY = 'app-negozio-state-v1';
 
 export const defaultState = Object.freeze({
@@ -42,23 +40,16 @@ export function createId(prefix) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${random}`;
 }
 
-function safeNumber(value, fallback = 0) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
-}
-
 export function normalizeTicket(ticket) {
-  const status = VALID_STATUSES.includes(ticket.status) ? ticket.status : 'Aperto';
-  const priority = VALID_PRIORITIES.includes(ticket.priority) ? ticket.priority : 'Media';
   return {
     id: ticket.id || createId('TKT'),
     customerName: String(ticket.customerName || '').trim(),
     phone: String(ticket.phone || '').trim(),
     device: String(ticket.device || '').trim(),
     issue: String(ticket.issue || '').trim(),
-    status,
-    priority,
-    estimate: Math.max(0, safeNumber(ticket.estimate)),
+    status: ticket.status || 'Aperto',
+    priority: ticket.priority || 'Media',
+    estimate: Number(ticket.estimate || 0),
     createdAt: ticket.createdAt || new Date().toISOString(),
     notes: String(ticket.notes || '').trim(),
   };
@@ -79,7 +70,7 @@ export function normalizeInventoryItem(item) {
     position: String(item.position || '').trim(),
     code: String(item.code || '').trim().toUpperCase(),
     description: String(item.description || '').trim(),
-    price: Math.max(0, safeNumber(item.price)),
-    quantity: Math.trunc(safeNumber(item.quantity)),
+    price: Number(item.price || 0),
+    quantity: Number(item.quantity || 0),
   };
 }

@@ -36,5 +36,3 @@ textarea { min-height: 92px; resize: vertical; }
 .inventory li.low { background: #fff4e8; color: #8a3d00; }
 .empty { color: #60708a; background: #f8fbff; border-radius: 16px; padding: 1rem; }
 @media (max-width: 900px) { .hero, .panel-header { flex-direction: column; align-items: stretch; } .stats, .grid { grid-template-columns: 1fr; padding-inline: 1rem; } .hero { padding: 1.5rem 1rem; } }
-.notice { margin: 1rem 2rem 0; padding: 1rem; border-radius: 14px; background: #fff4e8; color: #8a3d00; border: 1px solid #ffd4a8; font-weight: 700; }
-@media (max-width: 900px) { .notice { margin-inline: 1rem; } }
