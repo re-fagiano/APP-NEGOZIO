@@ -13,6 +13,9 @@ textarea { min-height: 92px; resize: vertical; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: flex-end; }
 .actions button, .file { background: rgba(255,255,255,.16); color: white; border: 1px solid rgba(255,255,255,.32); border-radius: 12px; padding: .75rem 1rem; font-weight: 800; cursor: pointer; }
 .file input { display: none; }
+.feedback { margin: 1rem 2rem 0; border-radius: 14px; padding: .9rem 1rem; font-weight: 700; }
+.feedback.success { background: #eaf8f0; border: 1px solid #b9e6cb; color: #17663b; }
+.feedback.error { background: #fff0f0; border: 1px solid #f0b8b8; color: #9a2424; }
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; padding: 1.25rem 2rem; }
 .stats article, .panel { background: white; border: 1px solid #e2e9f4; border-radius: 22px; box-shadow: 0 16px 36px rgba(21,40,80,.08); }
 .stats article { padding: 1.2rem; }
@@ -30,6 +33,7 @@ textarea { min-height: 92px; resize: vertical; }
 .ticket.bassa { border-color: #20a46b; }
 .ticket div:first-child { display: flex; justify-content: space-between; gap: 1rem; }
 .ticket span, small { color: #60708a; }
+.note { margin: 0; color: #41516a; background: #eef4ff; border-radius: 10px; padding: .55rem .65rem; }
 .row { display: flex; gap: .5rem; flex-wrap: wrap; }
 .inventory { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .55rem; }
 .inventory li { display: grid; gap: .15rem; padding: .7rem; border-radius: 12px; background: #f8fbff; }
