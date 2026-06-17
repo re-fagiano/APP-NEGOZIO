@@ -1,6 +1,5 @@
 import { loadState, saveState, createId } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
-import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
 import './styles.css';
 
 let state = loadState();
@@ -69,12 +68,8 @@ function restoreBackup(event) {
   const file = event.target.files?.[0];
   if (!file) return;
   file.text().then((content) => {
-    try {
-      state = JSON.parse(content);
-      persist();
-    } catch {
-      window.alert('Backup non valido: controlla che il file sia un JSON esportato dal gestionale.');
-    }
+    state = JSON.parse(content);
+    persist();
   });
 }
 
@@ -93,7 +88,7 @@ function render() {
     <header class="hero">
       <div>
         <p class="eyebrow">Gestionale negozio</p>
-        <h1>${escapeHtml(state.settings.shopName)}</h1>
+        <h1>${state.settings.shopName}</h1>
         <p>Ticket riparazioni, clienti, magazzino e backup locale in un'unica dashboard.</p>
       </div>
       <div class="actions">
@@ -123,7 +118,7 @@ function render() {
         </form>
       </section>
       <section class="panel wide">
-        <div class="panel-header"><h2>Ticket</h2><input id="search" value="${escapeAttribute(filter)}" placeholder="Cerca ticket..." /></div>
+        <div class="panel-header"><h2>Ticket</h2><input id="search" value="${filter}" placeholder="Cerca ticket..." /></div>
         <div class="cards">${visibleTickets.map(ticketTemplate).join('') || '<p class="empty">Nessun ticket presente.</p>'}</div>
       </section>
       <section class="panel">
@@ -151,23 +146,21 @@ function render() {
 }
 
 function ticketTemplate(ticket) {
-  const id = escapeAttribute(ticket.id);
-  const priority = escapeAttribute(ticket.priority.toLowerCase());
-  return `<article class="ticket ${priority}">
-    <div><strong>${escapeHtml(ticket.customerName)}</strong><span>${escapeHtml(ticket.device)}</span></div>
-    <p>${escapeHtml(ticket.issue)}</p>
-    <small>${id} · ${escapeHtml(ticket.priority)} · ${escapeHtml(ticket.status)} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
+  return `<article class="ticket ${ticket.priority.toLowerCase()}">
+    <div><strong>${ticket.customerName}</strong><span>${ticket.device}</span></div>
+    <p>${ticket.issue}</p>
+    <small>${ticket.id} · ${ticket.priority} · ${ticket.status} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
     <div class="row">
-      <button data-id="${id}" data-status="In lavorazione">In lavorazione</button>
-      <button data-id="${id}" data-status="Chiuso">Chiudi</button>
-      <button class="danger" data-delete="${id}">Elimina</button>
+      <button data-id="${ticket.id}" data-status="In lavorazione">In lavorazione</button>
+      <button data-id="${ticket.id}" data-status="Chiuso">Chiudi</button>
+      <button class="danger" data-delete="${ticket.id}">Elimina</button>
     </div>
   </article>`;
 }
 
 function itemTemplate(item) {
   const low = item.quantity <= state.settings.lowStockThreshold ? ' class="low"' : '';
-  return `<li${low}><strong>${escapeHtml(item.code)}</strong> ${escapeHtml(item.description)}<span>${Number(item.quantity || 0)} pz · € ${Number(item.price || 0).toFixed(2)}</span></li>`;
+  return `<li${low}><strong>${item.code}</strong> ${item.description}<span>${item.quantity} pz · € ${Number(item.price || 0).toFixed(2)}</span></li>`;
 }
 
 render();
