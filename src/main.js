@@ -1,7 +1,6 @@
 import { loadState, saveState, createId } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
 import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
-import { validateBackupPayload, validateInventoryDraft, validateTicketDraft, VALID_STATUSES } from './utils/validation.js';
 import './styles.css';
 
 let state = loadState();
