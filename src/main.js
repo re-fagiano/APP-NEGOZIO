@@ -1,7 +1,7 @@
 import { loadState, saveState, createId, normalizeState } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
 import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
-import { validateBackupPayload, validateInventoryDraft, validateSettingsDraft, validateTicketDraft, VALID_STATUSES } from './utils/validation.js';
+import './styles.css';
 
 let state = loadState();
 let filter = '';
@@ -10,13 +10,8 @@ let feedback = null;
 const app = document.querySelector('#app');
 
 function persist(message = null) {
-  try {
-    state = saveState(state);
-    feedback = message;
-  } catch {
-    state = normalizeState(state);
-    feedback = { type: 'error', text: 'Dati aggiornati solo in memoria: impossibile salvare nel browser.' };
-  }
+  state = saveState(state);
+  feedback = message;
   render();
 }
 
@@ -79,28 +74,8 @@ function setTicketStatus(id, status) {
 }
 
 function deleteTicket(id) {
-  const ticket = state.tickets.find((item) => item.id === id);
-  if (!ticket) return;
-  const confirmed = globalThis.confirm?.(`Eliminare il ticket ${ticket.id} di ${ticket.customerName}?`) ?? true;
-  if (!confirmed) return;
-  state.tickets = state.tickets.filter((item) => item.id !== id);
+  state.tickets = state.tickets.filter((ticket) => ticket.id !== id);
   persist({ type: 'success', text: 'Ticket eliminato.' });
-}
-
-function updateSettings(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.currentTarget));
-  const errors = validateSettingsDraft(data);
-  if (errors.length) {
-    showFeedback('error', errors.join(' '));
-    return;
-  }
-  state.settings = {
-    ...state.settings,
-    shopName: data.shopName.trim(),
-    lowStockThreshold: Number(data.lowStockThreshold || 0),
-  };
-  persist({ type: 'success', text: 'Impostazioni salvate.' });
 }
 
 function backupJson() {
@@ -128,7 +103,7 @@ function restoreBackup(event) {
         showFeedback('error', errors.join(' '));
         return;
       }
-      state = normalizeState(payload);
+      state = payload;
       persist({ type: 'success', text: 'Backup ripristinato correttamente.' });
     })
     .catch(() => showFeedback('error', 'Impossibile leggere il file di backup.'));
@@ -169,10 +144,8 @@ function render() {
       <section class="panel">
         <h2>Impostazioni negozio</h2>
         <form id="settings-form" class="form">
-          <label for="shopName">Nome negozio</label>
-          <input id="shopName" name="shopName" value="${escapeAttribute(state.settings.shopName)}" placeholder="Nome negozio" required />
-          <label for="lowStockThreshold">Soglia scorte basse</label>
-          <input id="lowStockThreshold" name="lowStockThreshold" type="number" step="1" min="0" value="${Number(state.settings.lowStockThreshold || 0)}" placeholder="Soglia scorte basse" />
+          <input name="shopName" value="${escapeAttribute(state.settings.shopName)}" placeholder="Nome negozio" required />
+          <input name="lowStockThreshold" type="number" step="1" min="0" value="${Number(state.settings.lowStockThreshold || 0)}" placeholder="Soglia scorte basse" />
           <button type="submit">Salva impostazioni</button>
         </form>
       </section>
@@ -197,7 +170,7 @@ function render() {
         </form>
       </section>
       <section class="panel wide">
-        <div class="panel-header"><h2>Ticket</h2><label class="sr-only" for="search">Cerca ticket</label><input id="search" value="${escapeAttribute(filter)}" placeholder="Cerca ticket..." /></div>
+        <div class="panel-header"><h2>Ticket</h2><input id="search" value="${escapeAttribute(filter)}" placeholder="Cerca ticket..." /></div>
         <div class="cards">${visibleTickets.map(ticketTemplate).join('') || '<p class="empty">Nessun ticket presente.</p>'}</div>
       </section>
       <section class="panel">
@@ -243,7 +216,6 @@ function ticketTemplate(ticket) {
   return `<article class="ticket ${priorityClass}">
     <div><strong>${escapeHtml(ticket.customerName)}</strong><span>${escapeHtml(ticket.device)}</span></div>
     <p>${escapeHtml(ticket.issue)}</p>
-    ${ticket.notes ? `<p class="note"><strong>Note:</strong> ${escapeHtml(ticket.notes)}</p>` : ''}
     <small>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.priority)} · ${escapeHtml(ticket.status)} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
     <div class="row">
       <button data-id="${ticketId}" data-status="In lavorazione">In lavorazione</button>
