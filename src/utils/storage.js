@@ -1,8 +1,10 @@
 import { VALID_PRIORITIES, VALID_STATUSES } from './validation.js';
 
 export const STORAGE_KEY = 'app-negozio-state-v1';
+export const STORAGE_SCHEMA_VERSION = 1;
 
 export const defaultState = Object.freeze({
+  schemaVersion: STORAGE_SCHEMA_VERSION,
   tickets: [],
   customers: [],
   inventory: [],
@@ -43,6 +45,7 @@ export function saveState(state, storage = getDefaultStorage()) {
 
 export function normalizeState(state) {
   return {
+    schemaVersion: STORAGE_SCHEMA_VERSION,
     tickets: Array.isArray(state?.tickets) ? state.tickets.map(normalizeTicket) : [],
     customers: Array.isArray(state?.customers) ? state.customers.map(normalizeCustomer) : [],
     inventory: Array.isArray(state?.inventory) ? state.inventory.map(normalizeInventoryItem) : [],

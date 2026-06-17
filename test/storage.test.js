@@ -7,6 +7,7 @@ test('normalizeState repairs missing collections and settings', () => {
   const state = normalizeState({ tickets: [{ customerName: 'Mario', device: 'iPhone', issue: 'Display' }] });
   assert.equal(state.tickets.length, 1);
   assert.equal(state.settings.shopName, 'FIXLAB');
+  assert.equal(state.schemaVersion, 1);
   assert.equal(state.inventory.length, 0);
 });
 

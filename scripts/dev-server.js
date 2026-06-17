@@ -7,6 +7,12 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(process.argv[2] || '.');
 const port = Number(process.argv[3] || 5173);
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
+const securityHeaders = {
+  'Content-Security-Policy': "default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+  'Referrer-Policy': 'no-referrer',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+};
 
 export function safeResolve(rootDir, urlPath) {
   const pathname = decodeURIComponent(urlPath === '/' ? '/index.html' : urlPath);

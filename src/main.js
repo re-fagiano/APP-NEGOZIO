@@ -152,13 +152,20 @@ function render() {
       <section class="panel">
         <h2>Nuovo ticket</h2>
         <form id="ticket-form" class="form">
-          <input name="customerName" placeholder="Cliente" required />
-          <input name="phone" placeholder="Telefono" />
-          <input name="device" placeholder="Dispositivo" required />
-          <textarea name="issue" placeholder="Problema segnalato" required></textarea>
-          <select name="priority"><option>Media</option><option>Alta</option><option>Bassa</option></select>
-          <input name="estimate" type="number" step="0.01" min="0" placeholder="Preventivo €" />
-          <textarea name="notes" placeholder="Note interne"></textarea>
+          <label for="customerName">Cliente</label>
+          <input id="customerName" name="customerName" placeholder="Cliente" required />
+          <label for="phone">Telefono</label>
+          <input id="phone" name="phone" placeholder="Telefono" />
+          <label for="device">Dispositivo</label>
+          <input id="device" name="device" placeholder="Dispositivo" required />
+          <label for="issue">Problema segnalato</label>
+          <textarea id="issue" name="issue" placeholder="Problema segnalato" required></textarea>
+          <label for="priority">Priorità</label>
+          <select id="priority" name="priority"><option>Media</option><option>Alta</option><option>Bassa</option></select>
+          <label for="estimate">Preventivo €</label>
+          <input id="estimate" name="estimate" type="number" step="0.01" min="0" placeholder="Preventivo €" />
+          <label for="notes">Note interne</label>
+          <textarea id="notes" name="notes" placeholder="Note interne"></textarea>
           <button type="submit">Crea ticket</button>
         </form>
       </section>
@@ -169,11 +176,16 @@ function render() {
       <section class="panel">
         <h2>Magazzino rapido</h2>
         <form id="inventory-form" class="form">
-          <input name="position" placeholder="Posizione" />
-          <input name="code" placeholder="Codice" required />
-          <input name="description" placeholder="Descrizione" required />
-          <input name="price" type="number" step="0.01" min="0" placeholder="Prezzo" />
-          <input name="quantity" type="number" step="1" placeholder="Quantità" />
+          <label for="position">Posizione</label>
+          <input id="position" name="position" placeholder="Posizione" />
+          <label for="code">Codice</label>
+          <input id="code" name="code" placeholder="Codice" required />
+          <label for="description">Descrizione</label>
+          <input id="description" name="description" placeholder="Descrizione" required />
+          <label for="price">Prezzo</label>
+          <input id="price" name="price" type="number" step="0.01" min="0" placeholder="Prezzo" />
+          <label for="quantity">Quantità</label>
+          <input id="quantity" name="quantity" type="number" step="1" placeholder="Quantità" />
           <button type="submit">Aggiungi articolo</button>
         </form>
         <ul class="inventory">${state.inventory.map(itemTemplate).join('') || '<li>Nessun articolo.</li>'}</ul>
