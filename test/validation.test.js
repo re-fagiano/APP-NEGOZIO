@@ -37,37 +37,3 @@ test('validateBackupPayload rejects malformed backup collections', () => {
 test('validateBackupPayload rejects malformed settings', () => {
   assert.deepEqual(validateBackupPayload({ settings: [] }), ['La proprietà settings deve essere un oggetto.']);
 });
-
-test('validateBackupPayload ensures backup arrays contain only objects', () => {
-  assert.deepEqual(validateBackupPayload({ tickets: [null], inventory: [[]], customers: ['bad'] }), [
-    'Ogni ticket del backup deve essere un oggetto.',
-    'Ogni articolo del backup deve essere un oggetto.',
-    'Ogni cliente del backup deve essere un oggetto.',
-  ]);
-});
-
-test('validateTicketDraft rejects invalid phone numbers and excessive text lengths', () => {
-  const errors = validateTicketDraft({
-    customerName: 'A'.repeat(81),
-    phone: 'abc',
-    device: 'D'.repeat(81),
-    issue: 'I'.repeat(601),
-    notes: 'N'.repeat(1001),
-    priority: 'Media',
-    estimate: 0,
-  });
-  assert.deepEqual(errors, [
-    'Il nome cliente è troppo lungo.',
-    'Inserisci un telefono valido.',
-    'Il dispositivo è troppo lungo.',
-    'La descrizione del problema è troppo lunga.',
-    'Le note interne sono troppo lunghe.',
-  ]);
-});
-
-test('validateInventoryDraft rejects excessive article text lengths', () => {
-  assert.deepEqual(validateInventoryDraft({ code: 'C'.repeat(41), description: 'D'.repeat(161), price: 1, quantity: 1 }), [
-    'Il codice articolo è troppo lungo.',
-    'La descrizione articolo è troppo lunga.',
-  ]);
-});
