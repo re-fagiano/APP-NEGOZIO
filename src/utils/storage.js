@@ -83,10 +83,10 @@ export function normalizeTicket(ticket = {}) {
 
 export function normalizeCustomer(customer = {}) {
   return {
-    id: customer.id || createId('CLI'),
-    name: String(customer.name || '').trim(),
-    phone: String(customer.phone || '').trim(),
-    email: String(customer.email || '').trim(),
+    id: source.id || createId('CLI'),
+    name: String(source.name || '').trim(),
+    phone: String(source.phone || '').trim(),
+    email: String(source.email || '').trim(),
   };
 }
 
