@@ -40,9 +40,6 @@ export function validateBackupPayload(payload) {
   if (payload && payload.tickets !== undefined && !Array.isArray(payload.tickets)) errors.push('La proprietà tickets deve essere una lista.');
   if (payload && payload.inventory !== undefined && !Array.isArray(payload.inventory)) errors.push('La proprietà inventory deve essere una lista.');
   if (payload && payload.customers !== undefined && !Array.isArray(payload.customers)) errors.push('La proprietà customers deve essere una lista.');
-  if (Array.isArray(payload?.tickets) && payload.tickets.some((ticket) => !ticket || typeof ticket !== 'object' || Array.isArray(ticket))) errors.push('Ogni ticket del backup deve essere un oggetto.');
-  if (Array.isArray(payload?.inventory) && payload.inventory.some((item) => !item || typeof item !== 'object' || Array.isArray(item))) errors.push('Ogni articolo del backup deve essere un oggetto.');
-  if (Array.isArray(payload?.customers) && payload.customers.some((customer) => !customer || typeof customer !== 'object' || Array.isArray(customer))) errors.push('Ogni cliente del backup deve essere un oggetto.');
   if (payload?.settings !== undefined && (!payload.settings || typeof payload.settings !== 'object' || Array.isArray(payload.settings))) errors.push('La proprietà settings deve essere un oggetto.');
   return errors;
 }
