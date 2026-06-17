@@ -30,9 +30,14 @@ export function loadState(storage = globalThis.localStorage) {
   }
 }
 
-export function saveState(state, storage = globalThis.localStorage) {
+export function saveState(state, storage = getDefaultStorage()) {
   const nextState = normalizeState({ ...state, updatedAt: new Date().toISOString() });
-  storage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  if (!storage) return nextState;
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+  } catch {
+    throw new Error('Impossibile salvare lo stato nel browser.');
+  }
   return nextState;
 }
 
