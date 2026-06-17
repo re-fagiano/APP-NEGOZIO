@@ -10,6 +10,22 @@ test('normalizeState repairs missing collections and settings', () => {
   assert.equal(state.inventory.length, 0);
 });
 
+test('normalizeState clamps invalid numbers and enum values', () => {
+  const state = normalizeState({
+    settings: { shopName: '  Lab  ', lowStockThreshold: -5 },
+    tickets: [{ customerName: 'A', device: 'PC', issue: 'SSD', priority: 'Urgente', status: 'Perso', estimate: 'abc' }],
+    inventory: [{ code: 'ram', description: 'RAM', price: -10, quantity: 2.9 }],
+  });
+  assert.equal(state.settings.shopName, 'Lab');
+  assert.equal(state.settings.lowStockThreshold, 0);
+  assert.equal(state.tickets[0].priority, 'Media');
+  assert.equal(state.tickets[0].status, 'Aperto');
+  assert.equal(state.tickets[0].estimate, 0);
+  assert.equal(state.inventory[0].code, 'RAM');
+  assert.equal(state.inventory[0].price, 0);
+  assert.equal(state.inventory[0].quantity, 2);
+});
+
 test('saveState and loadState persist normalized data', () => {
   const memory = new Map();
   const storage = { getItem: (key) => memory.get(key), setItem: (key, value) => memory.set(key, value) };
