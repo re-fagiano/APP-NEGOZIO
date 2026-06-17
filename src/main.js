@@ -1,4 +1,4 @@
-import { loadState, saveState, createId } from './utils/storage.js';
+import { loadState, saveState, createId, normalizeState } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
 import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
 import './styles.css';
@@ -142,6 +142,14 @@ function render() {
     </section>
     <main class="grid">
       <section class="panel">
+        <h2>Impostazioni negozio</h2>
+        <form id="settings-form" class="form">
+          <input name="shopName" value="${escapeAttribute(state.settings.shopName)}" placeholder="Nome negozio" required />
+          <input name="lowStockThreshold" type="number" step="1" min="0" value="${Number(state.settings.lowStockThreshold || 0)}" placeholder="Soglia scorte basse" />
+          <button type="submit">Salva impostazioni</button>
+        </form>
+      </section>
+      <section class="panel">
         <h2>Nuovo ticket</h2>
         <form id="ticket-form" class="form">
           <input name="customerName" placeholder="Cliente" required />
@@ -174,6 +182,7 @@ function render() {
 
   document.querySelector('#ticket-form').addEventListener('submit', addTicket);
   document.querySelector('#inventory-form').addEventListener('submit', addInventory);
+  document.querySelector('#settings-form').addEventListener('submit', updateSettings);
   document.querySelector('#backup').addEventListener('click', backupJson);
   document.querySelector('#csv').addEventListener('click', exportTicketsCsv);
   document.querySelector('#restore').addEventListener('change', restoreBackup);
