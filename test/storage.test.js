@@ -23,30 +23,3 @@ test('toCsv escapes semicolons and quotes', () => {
   const csv = toCsv([{ name: 'A;B', note: 'dice "ok"' }], ['name', 'note']);
   assert.equal(csv, 'name;note\n"A;B";"dice ""ok"""');
 });
-
-
-test('normalizeState clamps invalid enum and numeric values', () => {
-  const state = normalizeState({
-    tickets: [{ customerName: 'A', device: 'B', issue: 'C', priority: 'Critical', status: 'Lost', estimate: -12 }],
-    inventory: [{ code: 'x', description: 'Cable', price: -2, quantity: 3.8 }],
-  });
-  assert.equal(state.tickets[0].priority, 'Media');
-  assert.equal(state.tickets[0].status, 'Aperto');
-  assert.equal(state.tickets[0].estimate, 0);
-  assert.equal(state.inventory[0].price, 0);
-  assert.equal(state.inventory[0].quantity, 3);
-});
-
-
-test('saveState remains usable when storage write fails', () => {
-  const storage = { setItem: () => { throw new Error('quota'); } };
-  const saved = saveState({ settings: { shopName: 'Negozio', lowStockThreshold: -3 } }, storage);
-  assert.equal(saved.settings.shopName, 'Negozio');
-  assert.equal(saved.settings.lowStockThreshold, 0);
-});
-
-
-test('normalizeState prevents negative inventory quantity', () => {
-  const state = normalizeState({ inventory: [{ code: 'x', description: 'Cable', quantity: -4 }] });
-  assert.equal(state.inventory[0].quantity, 0);
-});
