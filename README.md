@@ -1,6 +1,6 @@
 # APP-NEGOZIO
 
-Nuova repository per il gestionale ticket negozio ispirato a `re-fagiano/GESTIONALEticket-google`, con una base Vite leggera e migliorie operative già incluse.
+Nuova repository per il gestionale ticket negozio ispirato a `re-fagiano/GESTIONALEticket-google`, con una base frontend statica servita da script Node leggeri e migliorie operative già incluse.
 
 ## Funzionalità
 

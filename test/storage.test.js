@@ -1,13 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeState, saveState, loadState } from '../src/utils/storage.js';
+import { createId, normalizeState, saveState, loadState } from '../src/utils/storage.js';
 import { toCsv } from '../src/utils/export.js';
 
 test('normalizeState repairs missing collections and settings', () => {
   const state = normalizeState({ tickets: [{ customerName: 'Mario', device: 'iPhone', issue: 'Display' }] });
   assert.equal(state.tickets.length, 1);
   assert.equal(state.settings.shopName, 'FIXLAB');
+  assert.equal(state.schemaVersion, 1);
   assert.equal(state.inventory.length, 0);
+});
+
+test('normalizeState clamps invalid numbers and enum values', () => {
+  const state = normalizeState({
+    settings: { shopName: '  Lab  ', lowStockThreshold: -5 },
+    tickets: [{ customerName: 'A', device: 'PC', issue: 'SSD', priority: 'Urgente', status: 'Perso', estimate: 'abc' }],
+    inventory: [{ code: 'ram', description: 'RAM', price: -10, quantity: 2.9 }],
+  });
+  assert.equal(state.settings.shopName, 'Lab');
+  assert.equal(state.settings.lowStockThreshold, 0);
+  assert.equal(state.tickets[0].priority, 'Media');
+  assert.equal(state.tickets[0].status, 'Aperto');
+  assert.equal(state.tickets[0].estimate, 0);
+  assert.equal(state.inventory[0].code, 'RAM');
+  assert.equal(state.inventory[0].price, 0);
+  assert.equal(state.inventory[0].quantity, 2);
 });
 
 test('saveState and loadState persist normalized data', () => {
@@ -22,4 +39,38 @@ test('saveState and loadState persist normalized data', () => {
 test('toCsv escapes semicolons and quotes', () => {
   const csv = toCsv([{ name: 'A;B', note: 'dice "ok"' }], ['name', 'note']);
   assert.equal(csv, 'name;note\n"A;B";"dice ""ok"""');
+});
+
+test('createId uses crypto.randomUUID when available', () => {
+  const originalCrypto = globalThis.crypto;
+  Object.defineProperty(globalThis, 'crypto', { value: { randomUUID: () => '123e4567-e89b-12d3-a456-426614174000' }, configurable: true });
+  assert.equal(createId('TKT'), 'TKT-123E4567-E89B-12D3-A456-426614174000');
+  Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, configurable: true });
+});
+
+test('normalizeState tolerates null entries from corrupted local state', () => {
+  const state = normalizeState({ tickets: [null], customers: [null], inventory: [null] });
+  assert.equal(state.tickets.length, 1);
+  assert.equal(state.tickets[0].status, 'Aperto');
+  assert.equal(state.customers[0].name, '');
+  assert.equal(state.inventory[0].quantity, 0);
+});
+
+test('saveState returns normalized state when storage is unavailable', () => {
+  const saved = saveState({ tickets: [{ customerName: 'No storage', device: 'PC', issue: 'RAM' }] }, null);
+  assert.equal(saved.tickets[0].customerName, 'No storage');
+  assert.ok(saved.updatedAt);
+});
+
+test('saveState reports storage write failures', () => {
+  const failingStorage = { setItem: () => { throw new Error('quota'); } };
+  assert.throws(() => saveState({ tickets: [] }, failingStorage), /Impossibile salvare/);
+});
+
+test('normalizeState preserves and trims customer data', () => {
+  const state = normalizeState({ customers: [{ id: 'CLI-1', name: '  Anna  ', phone: ' 333 ', email: ' test@example.com ' }] });
+  assert.equal(state.customers[0].id, 'CLI-1');
+  assert.equal(state.customers[0].name, 'Anna');
+  assert.equal(state.customers[0].phone, '333');
+  assert.equal(state.customers[0].email, 'test@example.com');
 });
