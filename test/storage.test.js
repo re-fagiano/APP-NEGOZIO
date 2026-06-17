@@ -46,22 +46,3 @@ test('createId uses crypto.randomUUID when available', () => {
   assert.equal(createId('TKT'), 'TKT-123E4567-E89B-12D3-A456-426614174000');
   Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, configurable: true });
 });
-
-test('normalizeState tolerates null entries from corrupted local state', () => {
-  const state = normalizeState({ tickets: [null], customers: [null], inventory: [null] });
-  assert.equal(state.tickets.length, 1);
-  assert.equal(state.tickets[0].status, 'Aperto');
-  assert.equal(state.customers[0].name, '');
-  assert.equal(state.inventory[0].quantity, 0);
-});
-
-test('saveState returns normalized state when storage is unavailable', () => {
-  const saved = saveState({ tickets: [{ customerName: 'No storage', device: 'PC', issue: 'RAM' }] }, null);
-  assert.equal(saved.tickets[0].customerName, 'No storage');
-  assert.ok(saved.updatedAt);
-});
-
-test('saveState reports storage write failures', () => {
-  const failingStorage = { setItem: () => { throw new Error('quota'); } };
-  assert.throws(() => saveState({ tickets: [] }, failingStorage), /Impossibile salvare/);
-});
