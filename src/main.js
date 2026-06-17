@@ -186,7 +186,14 @@ function render() {
   document.querySelector('#backup').addEventListener('click', backupJson);
   document.querySelector('#csv').addEventListener('click', exportTicketsCsv);
   document.querySelector('#restore').addEventListener('change', restoreBackup);
-  document.querySelector('#search').addEventListener('input', (event) => { filter = event.target.value; render(); });
+  document.querySelector('#search').addEventListener('input', (event) => {
+    const cursor = event.target.selectionStart;
+    filter = event.target.value;
+    render();
+    const search = document.querySelector('#search');
+    search.focus();
+    search.setSelectionRange(cursor, cursor);
+  });
   document.querySelectorAll('[data-status]').forEach((button) => button.addEventListener('click', () => setTicketStatus(button.dataset.id, button.dataset.status)));
   document.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', () => deleteTicket(button.dataset.delete)));
 }

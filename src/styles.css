@@ -33,6 +33,7 @@ textarea { min-height: 92px; resize: vertical; }
 .ticket.bassa { border-color: #20a46b; }
 .ticket div:first-child { display: flex; justify-content: space-between; gap: 1rem; }
 .ticket span, small { color: #60708a; }
+.note { margin: 0; color: #41516a; background: #eef4ff; border-radius: 10px; padding: .55rem .65rem; }
 .row { display: flex; gap: .5rem; flex-wrap: wrap; }
 .inventory { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .55rem; }
 .inventory li { display: grid; gap: .15rem; padding: .7rem; border-radius: 12px; background: #f8fbff; }

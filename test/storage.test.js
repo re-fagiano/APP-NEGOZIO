@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeState, saveState, loadState } from '../src/utils/storage.js';
+import { createId, normalizeState, saveState, loadState } from '../src/utils/storage.js';
 import { toCsv } from '../src/utils/export.js';
 
 test('normalizeState repairs missing collections and settings', () => {
@@ -38,4 +38,11 @@ test('saveState and loadState persist normalized data', () => {
 test('toCsv escapes semicolons and quotes', () => {
   const csv = toCsv([{ name: 'A;B', note: 'dice "ok"' }], ['name', 'note']);
   assert.equal(csv, 'name;note\n"A;B";"dice ""ok"""');
+});
+
+test('createId uses crypto.randomUUID when available', () => {
+  const originalCrypto = globalThis.crypto;
+  Object.defineProperty(globalThis, 'crypto', { value: { randomUUID: () => '123e4567-e89b-12d3-a456-426614174000' }, configurable: true });
+  assert.equal(createId('TKT'), 'TKT-123E4567-E89B-12D3-A456-426614174000');
+  Object.defineProperty(globalThis, 'crypto', { value: originalCrypto, configurable: true });
 });

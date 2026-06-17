@@ -56,11 +56,17 @@ export function normalizeSettings(settings) {
 }
 
 export function createId(prefix) {
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID().toUpperCase()}`;
+  const bytes = new Uint8Array(8);
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+    return `${prefix}-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+  }
   const random = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${random}`;
 }
 
-export function normalizeTicket(ticket) {
+export function normalizeTicket(ticket = {}) {
   return {
     id: ticket.id || createId('TKT'),
     customerName: String(ticket.customerName || '').trim(),
@@ -75,7 +81,7 @@ export function normalizeTicket(ticket) {
   };
 }
 
-export function normalizeCustomer(customer) {
+export function normalizeCustomer(customer = {}) {
   return {
     id: customer.id || createId('CLI'),
     name: String(customer.name || '').trim(),
@@ -84,7 +90,7 @@ export function normalizeCustomer(customer) {
   };
 }
 
-export function normalizeInventoryItem(item) {
+export function normalizeInventoryItem(item = {}) {
   return {
     id: item.id || createId('ART'),
     position: String(item.position || '').trim(),

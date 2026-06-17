@@ -9,3 +9,8 @@ test('dev server path resolver keeps requests inside root', () => {
   assert.equal(safeResolve(root, '/../secret.txt'), null);
   assert.equal(safeResolve(root, '/%2e%2e/secret.txt'), null);
 });
+
+test('dev server path resolver rejects malformed encoded URLs', () => {
+  const root = resolve('/tmp/app');
+  assert.equal(safeResolve(root, '/%E0%A4%A'), null);
+});
