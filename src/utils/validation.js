@@ -1,22 +1,53 @@
 export const VALID_PRIORITIES = Object.freeze(['Bassa', 'Media', 'Alta']);
 export const VALID_STATUSES = Object.freeze(['Aperto', 'In lavorazione', 'Chiuso']);
+export const MAX_TEXT_LENGTHS = Object.freeze({ customerName: 80, phone: 30, device: 80, issue: 600, notes: 1000, code: 40, description: 160 });
+
+function exceedsLength(value, max) {
+  return String(value || '').trim().length > max;
+}
+
+function hasValidPhoneFormat(value) {
+  const phone = String(value || '').trim();
+  return !phone || /^[+()\d\s.-]{6,30}$/.test(phone);
+}
+
+function isFiniteNumber(value) {
+  if (value === '' || value === null || value === undefined) return true;
+  return Number.isFinite(Number(value));
+}
 
 export function validateTicketDraft(draft) {
   const errors = [];
   if (!String(draft.customerName || '').trim()) errors.push('Inserisci il nome cliente.');
+  if (exceedsLength(draft.customerName, MAX_TEXT_LENGTHS.customerName)) errors.push('Il nome cliente è troppo lungo.');
+  if (!hasValidPhoneFormat(draft.phone)) errors.push('Inserisci un telefono valido.');
   if (!String(draft.device || '').trim()) errors.push('Inserisci il dispositivo.');
+  if (exceedsLength(draft.device, MAX_TEXT_LENGTHS.device)) errors.push('Il dispositivo è troppo lungo.');
   if (!String(draft.issue || '').trim()) errors.push('Descrivi il problema segnalato.');
+  if (exceedsLength(draft.issue, MAX_TEXT_LENGTHS.issue)) errors.push('La descrizione del problema è troppo lunga.');
+  if (exceedsLength(draft.notes, MAX_TEXT_LENGTHS.notes)) errors.push('Le note interne sono troppo lunghe.');
   if (!VALID_PRIORITIES.includes(draft.priority)) errors.push('Seleziona una priorità valida.');
-  if (Number(draft.estimate || 0) < 0) errors.push('Il preventivo non può essere negativo.');
+  if (!isFiniteNumber(draft.estimate) || Number(draft.estimate || 0) < 0) errors.push('Il preventivo deve essere un numero positivo.');
   return errors;
 }
 
 export function validateInventoryDraft(draft) {
   const errors = [];
   if (!String(draft.code || '').trim()) errors.push('Inserisci il codice articolo.');
+  if (exceedsLength(draft.code, MAX_TEXT_LENGTHS.code)) errors.push('Il codice articolo è troppo lungo.');
   if (!String(draft.description || '').trim()) errors.push('Inserisci la descrizione articolo.');
-  if (Number(draft.price || 0) < 0) errors.push('Il prezzo non può essere negativo.');
+  if (exceedsLength(draft.description, MAX_TEXT_LENGTHS.description)) errors.push('La descrizione articolo è troppo lunga.');
+  if (!isFiniteNumber(draft.price) || Number(draft.price || 0) < 0) errors.push('Il prezzo deve essere un numero positivo.');
   if (!Number.isInteger(Number(draft.quantity || 0))) errors.push('La quantità deve essere un numero intero.');
+  if (Number(draft.quantity || 0) < 0) errors.push('La quantità non può essere negativa.');
+  return errors;
+}
+
+export function validateSettingsDraft(draft) {
+  const errors = [];
+  if (!String(draft.shopName || '').trim()) errors.push('Inserisci il nome negozio.');
+  if (!Number.isInteger(Number(draft.lowStockThreshold || 0))) errors.push('La soglia scorte deve essere un numero intero.');
+  if (Number(draft.lowStockThreshold || 0) < 0) errors.push('La soglia scorte non può essere negativa.');
   return errors;
 }
 
@@ -26,5 +57,9 @@ export function validateBackupPayload(payload) {
   if (payload && payload.tickets !== undefined && !Array.isArray(payload.tickets)) errors.push('La proprietà tickets deve essere una lista.');
   if (payload && payload.inventory !== undefined && !Array.isArray(payload.inventory)) errors.push('La proprietà inventory deve essere una lista.');
   if (payload && payload.customers !== undefined && !Array.isArray(payload.customers)) errors.push('La proprietà customers deve essere una lista.');
+  if (Array.isArray(payload?.tickets) && payload.tickets.some((ticket) => !ticket || typeof ticket !== 'object' || Array.isArray(ticket))) errors.push('Ogni ticket del backup deve essere un oggetto.');
+  if (Array.isArray(payload?.inventory) && payload.inventory.some((item) => !item || typeof item !== 'object' || Array.isArray(item))) errors.push('Ogni articolo del backup deve essere un oggetto.');
+  if (Array.isArray(payload?.customers) && payload.customers.some((customer) => !customer || typeof customer !== 'object' || Array.isArray(customer))) errors.push('Ogni cliente del backup deve essere un oggetto.');
+  if (payload?.settings !== undefined && (!payload.settings || typeof payload.settings !== 'object' || Array.isArray(payload.settings))) errors.push('La proprietà settings deve essere un oggetto.');
   return errors;
 }
