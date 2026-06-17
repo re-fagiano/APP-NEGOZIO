@@ -1,13 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-
-function safeResolve(root, urlPath) {
-  const pathname = decodeURIComponent(urlPath === '/' ? '/index.html' : urlPath);
-  const candidate = resolve(root, `.${pathname}`);
-  if (candidate !== root && !candidate.startsWith(`${root}/`)) return null;
-  return candidate;
-}
+import { safeResolve } from '../scripts/dev-server.js';
 
 test('dev server path resolver keeps requests inside root', () => {
   const root = resolve('/tmp/app');

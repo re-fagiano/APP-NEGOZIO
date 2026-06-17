@@ -1,20 +1,34 @@
 import { loadState, saveState, createId } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
+import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
+import { validateBackupPayload, validateInventoryDraft, validateTicketDraft, VALID_STATUSES } from './utils/validation.js';
 import './styles.css';
 
 let state = loadState();
 let filter = '';
+let feedback = null;
 
 const app = document.querySelector('#app');
 
-function persist() {
+function persist(message = null) {
   state = saveState(state);
+  feedback = message;
+  render();
+}
+
+function showFeedback(type, text) {
+  feedback = { type, text };
   render();
 }
 
 function addTicket(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget));
+  const errors = validateTicketDraft(data);
+  if (errors.length) {
+    showFeedback('error', errors.join(' '));
+    return;
+  }
   state.tickets.unshift({
     id: createId('TKT'),
     customerName: data.customerName,
@@ -28,12 +42,17 @@ function addTicket(event) {
     createdAt: new Date().toISOString(),
   });
   event.currentTarget.reset();
-  persist();
+  persist({ type: 'success', text: 'Ticket creato correttamente.' });
 }
 
 function addInventory(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.currentTarget));
+  const errors = validateInventoryDraft(data);
+  if (errors.length) {
+    showFeedback('error', errors.join(' '));
+    return;
+  }
   state.inventory.unshift({
     id: createId('ART'),
     position: data.position,
@@ -43,17 +62,21 @@ function addInventory(event) {
     quantity: Number(data.quantity || 0),
   });
   event.currentTarget.reset();
-  persist();
+  persist({ type: 'success', text: 'Articolo aggiunto al magazzino.' });
 }
 
 function setTicketStatus(id, status) {
+  if (!VALID_STATUSES.includes(status)) {
+    showFeedback('error', 'Stato ticket non valido.');
+    return;
+  }
   state.tickets = state.tickets.map((ticket) => (ticket.id === id ? { ...ticket, status } : ticket));
-  persist();
+  persist({ type: 'success', text: 'Stato ticket aggiornato.' });
 }
 
 function deleteTicket(id) {
   state.tickets = state.tickets.filter((ticket) => ticket.id !== id);
-  persist();
+  persist({ type: 'success', text: 'Ticket eliminato.' });
 }
 
 function backupJson() {
@@ -67,10 +90,24 @@ function exportTicketsCsv() {
 function restoreBackup(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  file.text().then((content) => {
-    state = JSON.parse(content);
-    persist();
-  });
+  file.text()
+    .then((content) => {
+      let payload;
+      try {
+        payload = JSON.parse(content);
+      } catch {
+        showFeedback('error', 'Il file selezionato non contiene un JSON valido.');
+        return;
+      }
+      const errors = validateBackupPayload(payload);
+      if (errors.length) {
+        showFeedback('error', errors.join(' '));
+        return;
+      }
+      state = payload;
+      persist({ type: 'success', text: 'Backup ripristinato correttamente.' });
+    })
+    .catch(() => showFeedback('error', 'Impossibile leggere il file di backup.'));
 }
 
 function dashboard() {
@@ -88,7 +125,7 @@ function render() {
     <header class="hero">
       <div>
         <p class="eyebrow">Gestionale negozio</p>
-        <h1>${state.settings.shopName}</h1>
+        <h1>${escapeHtml(state.settings.shopName)}</h1>
         <p>Ticket riparazioni, clienti, magazzino e backup locale in un'unica dashboard.</p>
       </div>
       <div class="actions">
@@ -97,6 +134,7 @@ function render() {
         <label class="file">Ripristina JSON<input id="restore" type="file" accept="application/json" /></label>
       </div>
     </header>
+    ${feedback ? `<p class="feedback ${escapeAttribute(feedback.type)}" role="status">${escapeHtml(feedback.text)}</p>` : ''}
     <section class="stats">
       <article><strong>${stats.openTickets}</strong><span>Ticket aperti</span></article>
       <article><strong>${stats.urgentTickets}</strong><span>Priorità alta</span></article>
@@ -118,7 +156,7 @@ function render() {
         </form>
       </section>
       <section class="panel wide">
-        <div class="panel-header"><h2>Ticket</h2><input id="search" value="${filter}" placeholder="Cerca ticket..." /></div>
+        <div class="panel-header"><h2>Ticket</h2><input id="search" value="${escapeAttribute(filter)}" placeholder="Cerca ticket..." /></div>
         <div class="cards">${visibleTickets.map(ticketTemplate).join('') || '<p class="empty">Nessun ticket presente.</p>'}</div>
       </section>
       <section class="panel">
@@ -146,21 +184,23 @@ function render() {
 }
 
 function ticketTemplate(ticket) {
-  return `<article class="ticket ${ticket.priority.toLowerCase()}">
-    <div><strong>${ticket.customerName}</strong><span>${ticket.device}</span></div>
-    <p>${ticket.issue}</p>
-    <small>${ticket.id} · ${ticket.priority} · ${ticket.status} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
+  const priorityClass = escapeAttribute(String(ticket.priority || '').toLowerCase());
+  const ticketId = escapeAttribute(ticket.id);
+  return `<article class="ticket ${priorityClass}">
+    <div><strong>${escapeHtml(ticket.customerName)}</strong><span>${escapeHtml(ticket.device)}</span></div>
+    <p>${escapeHtml(ticket.issue)}</p>
+    <small>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.priority)} · ${escapeHtml(ticket.status)} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
     <div class="row">
-      <button data-id="${ticket.id}" data-status="In lavorazione">In lavorazione</button>
-      <button data-id="${ticket.id}" data-status="Chiuso">Chiudi</button>
-      <button class="danger" data-delete="${ticket.id}">Elimina</button>
+      <button data-id="${ticketId}" data-status="In lavorazione">In lavorazione</button>
+      <button data-id="${ticketId}" data-status="Chiuso">Chiudi</button>
+      <button class="danger" data-delete="${ticketId}">Elimina</button>
     </div>
   </article>`;
 }
 
 function itemTemplate(item) {
   const low = item.quantity <= state.settings.lowStockThreshold ? ' class="low"' : '';
-  return `<li${low}><strong>${item.code}</strong> ${item.description}<span>${item.quantity} pz · € ${Number(item.price || 0).toFixed(2)}</span></li>`;
+  return `<li${low}><strong>${escapeHtml(item.code)}</strong> ${escapeHtml(item.description)}<span>${Number(item.quantity || 0)} pz · € ${Number(item.price || 0).toFixed(2)}</span></li>`;
 }
 
 render();
