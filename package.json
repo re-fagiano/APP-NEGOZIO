@@ -9,7 +9,8 @@
     "build": "node scripts/build.js",
     "preview": "node scripts/dev-server.js dist 4173",
     "test": "node --test",
-    "lint": "node scripts/static-check.js"
+    "lint": "node scripts/static-check.js",
+    "smoke": "node scripts/smoke.js"
   },
   "dependencies": {},
   "devDependencies": {}
