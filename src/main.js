@@ -1,7 +1,6 @@
 import { loadState, saveState, createId, normalizeState } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
 import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
-import { validateBackupPayload, validateInventoryDraft, validateSettingsDraft, validateTicketDraft, VALID_STATUSES } from './utils/validation.js';
 import './styles.css';
 
 let state = loadState();
@@ -75,28 +74,8 @@ function setTicketStatus(id, status) {
 }
 
 function deleteTicket(id) {
-  const ticket = state.tickets.find((item) => item.id === id);
-  if (!ticket) return;
-  const confirmed = globalThis.confirm?.(`Eliminare il ticket ${ticket.id} di ${ticket.customerName}?`) ?? true;
-  if (!confirmed) return;
-  state.tickets = state.tickets.filter((item) => item.id !== id);
+  state.tickets = state.tickets.filter((ticket) => ticket.id !== id);
   persist({ type: 'success', text: 'Ticket eliminato.' });
-}
-
-function updateSettings(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.currentTarget));
-  const errors = validateSettingsDraft(data);
-  if (errors.length) {
-    showFeedback('error', errors.join(' '));
-    return;
-  }
-  state.settings = {
-    ...state.settings,
-    shopName: data.shopName.trim(),
-    lowStockThreshold: Number(data.lowStockThreshold || 0),
-  };
-  persist({ type: 'success', text: 'Impostazioni salvate.' });
 }
 
 function backupJson() {
@@ -124,7 +103,7 @@ function restoreBackup(event) {
         showFeedback('error', errors.join(' '));
         return;
       }
-      state = normalizeState(payload);
+      state = payload;
       persist({ type: 'success', text: 'Backup ripristinato correttamente.' });
     })
     .catch(() => showFeedback('error', 'Impossibile leggere il file di backup.'));
