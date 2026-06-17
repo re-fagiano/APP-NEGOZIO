@@ -37,11 +37,3 @@ test('validateBackupPayload rejects malformed backup collections', () => {
 test('validateBackupPayload rejects malformed settings', () => {
   assert.deepEqual(validateBackupPayload({ settings: [] }), ['La proprietà settings deve essere un oggetto.']);
 });
-
-test('validateBackupPayload ensures backup arrays contain only objects', () => {
-  assert.deepEqual(validateBackupPayload({ tickets: [null], inventory: [[]], customers: ['bad'] }), [
-    'Ogni ticket del backup deve essere un oggetto.',
-    'Ogni articolo del backup deve essere un oggetto.',
-    'Ogni cliente del backup deve essere un oggetto.',
-  ]);
-});

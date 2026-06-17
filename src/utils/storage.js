@@ -21,15 +21,7 @@ function integerOrZero(value) {
   return Math.trunc(numberOrZero(value));
 }
 
-function getDefaultStorage() {
-  try {
-    return globalThis.localStorage;
-  } catch {
-    return null;
-  }
-}
-
-export function loadState(storage = getDefaultStorage()) {
+export function loadState(storage = globalThis.localStorage) {
   if (!storage) return structuredClone(defaultState);
   const raw = storage.getItem(STORAGE_KEY);
   if (!raw) return structuredClone(defaultState);
@@ -83,39 +75,36 @@ export function createId(prefix) {
 }
 
 export function normalizeTicket(ticket = {}) {
-  const source = ticket && typeof ticket === 'object' && !Array.isArray(ticket) ? ticket : {};
   return {
-    id: source.id || createId('TKT'),
-    customerName: String(source.customerName || '').trim(),
-    phone: String(source.phone || '').trim(),
-    device: String(source.device || '').trim(),
-    issue: String(source.issue || '').trim(),
-    status: VALID_STATUSES.includes(source.status) ? source.status : 'Aperto',
-    priority: VALID_PRIORITIES.includes(source.priority) ? source.priority : 'Media',
-    estimate: numberOrZero(source.estimate),
-    createdAt: source.createdAt || new Date().toISOString(),
-    notes: String(source.notes || '').trim(),
+    id: ticket.id || createId('TKT'),
+    customerName: String(ticket.customerName || '').trim(),
+    phone: String(ticket.phone || '').trim(),
+    device: String(ticket.device || '').trim(),
+    issue: String(ticket.issue || '').trim(),
+    status: VALID_STATUSES.includes(ticket.status) ? ticket.status : 'Aperto',
+    priority: VALID_PRIORITIES.includes(ticket.priority) ? ticket.priority : 'Media',
+    estimate: numberOrZero(ticket.estimate),
+    createdAt: ticket.createdAt || new Date().toISOString(),
+    notes: String(ticket.notes || '').trim(),
   };
 }
 
 export function normalizeCustomer(customer = {}) {
-  const safeCustomer = customer && typeof customer === 'object' && !Array.isArray(customer) ? customer : {};
   return {
-    id: safeCustomer.id || createId('CLI'),
-    name: String(safeCustomer.name || '').trim(),
-    phone: String(safeCustomer.phone || '').trim(),
-    email: String(safeCustomer.email || '').trim(),
+    id: source.id || createId('CLI'),
+    name: String(source.name || '').trim(),
+    phone: String(source.phone || '').trim(),
+    email: String(source.email || '').trim(),
   };
 }
 
 export function normalizeInventoryItem(item = {}) {
-  const source = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
   return {
-    id: source.id || createId('ART'),
-    position: String(source.position || '').trim(),
-    code: String(source.code || '').trim().toUpperCase(),
-    description: String(source.description || '').trim(),
-    price: numberOrZero(source.price),
-    quantity: integerOrZero(source.quantity),
+    id: item.id || createId('ART'),
+    position: String(item.position || '').trim(),
+    code: String(item.code || '').trim().toUpperCase(),
+    description: String(item.description || '').trim(),
+    price: numberOrZero(item.price),
+    quantity: integerOrZero(item.quantity),
   };
 }

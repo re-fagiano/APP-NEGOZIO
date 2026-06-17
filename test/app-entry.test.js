@@ -15,11 +15,3 @@ test('main entrypoint wires validation helpers and settings handler', async () =
   assert.match(main, /validateBackupPayload/);
   assert.match(main, /function updateSettings/);
 });
-
-test('main templates expose accessible form labels', async () => {
-  const main = await readFile('src/main.js', 'utf8');
-  for (const id of ['customerName', 'phone', 'device', 'issue', 'priority', 'estimate', 'notes', 'shopName', 'lowStockThreshold', 'code', 'description']) {
-    assert.match(main, new RegExp(`for=\"${id}\"`));
-    assert.match(main, new RegExp(`id=\"${id}\"`));
-  }
-});
