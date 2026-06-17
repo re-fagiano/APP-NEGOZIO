@@ -1,6 +1,11 @@
+export function neutralizeSpreadsheetFormula(value) {
+  const text = String(value ?? '');
+  return /^[=+\-@]/.test(text.trimStart()) ? `'${text}` : text;
+}
+
 export function toCsv(rows, headers) {
   const escape = (value) => {
-    const text = String(value ?? '');
+    const text = neutralizeSpreadsheetFormula(value);
     return /[";\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
   };
   return [headers.join(';'), ...rows.map((row) => headers.map((key) => escape(row[key])).join(';'))].join('\n');
