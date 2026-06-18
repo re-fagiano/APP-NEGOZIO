@@ -233,6 +233,7 @@ function ticketTemplate(ticket) {
   return `<article class="ticket ${priorityClass}">
     <div><strong>${escapeHtml(ticket.customerName)}</strong><span>${escapeHtml(ticket.device)}</span></div>
     <p>${escapeHtml(ticket.issue)}</p>
+    ${ticket.notes ? `<p class="note">${escapeHtml(ticket.notes)}</p>` : ''}
     <small>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.priority)} · ${escapeHtml(ticket.status)} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
     <div class="row">
       <button data-id="${ticketId}" data-status="In lavorazione">In lavorazione</button>

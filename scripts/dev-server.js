@@ -60,5 +60,5 @@ export function createStaticServer(rootDir = root) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  createStaticServer().listen(port, '0.0.0.0', () => process.stdout.write(`Server listening on http://0.0.0.0:${port}\n`));
+  createStaticServer().listen(port, '127.0.0.1', () => process.stdout.write(`Server listening on http://127.0.0.1:${port}\n`));
 }
