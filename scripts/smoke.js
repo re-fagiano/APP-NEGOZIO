@@ -1,7 +1,8 @@
 import { once } from 'node:events';
+import { resolve } from 'node:path';
 import { createStaticServer } from './dev-server.js';
 
-const server = createStaticServer('.');
+const server = createStaticServer(resolve('.'));
 server.listen(0, '127.0.0.1');
 await once(server, 'listening');
 const { port } = server.address();

@@ -16,11 +16,6 @@ function isFiniteNumber(value) {
   return Number.isFinite(Number(value));
 }
 
-function isFiniteNumber(value) {
-  if (value === '' || value === null || value === undefined) return true;
-  return Number.isFinite(Number(value));
-}
-
 export function validateTicketDraft(draft) {
   const errors = [];
   if (!String(draft.customerName || '').trim()) errors.push('Inserisci il nome cliente.');
