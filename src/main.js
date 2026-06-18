@@ -1,7 +1,7 @@
 import { loadState, saveState, createId, normalizeState } from './utils/storage.js';
 import { downloadText, toCsv } from './utils/export.js';
 import { escapeAttribute, escapeHtml } from './utils/sanitize.js';
-import './styles.css';
+import { VALID_STATUSES, validateBackupPayload, validateInventoryDraft, validateSettingsDraft, validateTicketDraft } from './utils/validation.js';
 
 let state = loadState();
 let filter = '';
@@ -62,6 +62,23 @@ function addInventory(event) {
   });
   event.currentTarget.reset();
   persist({ type: 'success', text: 'Articolo aggiunto al magazzino.' });
+}
+
+
+function updateSettings(event) {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(event.currentTarget));
+  const errors = validateSettingsDraft(data);
+  if (errors.length) {
+    showFeedback('error', errors.join(' '));
+    return;
+  }
+  state.settings = {
+    ...state.settings,
+    shopName: data.shopName,
+    lowStockThreshold: Number(data.lowStockThreshold || 0),
+  };
+  persist({ type: 'success', text: 'Impostazioni aggiornate.' });
 }
 
 function setTicketStatus(id, status) {
@@ -216,6 +233,7 @@ function ticketTemplate(ticket) {
   return `<article class="ticket ${priorityClass}">
     <div><strong>${escapeHtml(ticket.customerName)}</strong><span>${escapeHtml(ticket.device)}</span></div>
     <p>${escapeHtml(ticket.issue)}</p>
+    ${ticket.notes ? `<p class="note">${escapeHtml(ticket.notes)}</p>` : ''}
     <small>${escapeHtml(ticket.id)} · ${escapeHtml(ticket.priority)} · ${escapeHtml(ticket.status)} · € ${Number(ticket.estimate || 0).toFixed(2)}</small>
     <div class="row">
       <button data-id="${ticketId}" data-status="In lavorazione">In lavorazione</button>
