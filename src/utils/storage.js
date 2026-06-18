@@ -21,7 +21,15 @@ function integerOrZero(value) {
   return Math.trunc(numberOrZero(value));
 }
 
-export function loadState(storage = globalThis.localStorage) {
+function getDefaultStorage() {
+  try {
+    return globalThis.localStorage || null;
+  } catch {
+    return null;
+  }
+}
+
+export function loadState(storage = getDefaultStorage()) {
   if (!storage) return structuredClone(defaultState);
   const raw = storage.getItem(STORAGE_KEY);
   if (!raw) return structuredClone(defaultState);
@@ -91,10 +99,10 @@ export function normalizeTicket(ticket = {}) {
 
 export function normalizeCustomer(customer = {}) {
   return {
-    id: source.id || createId('CLI'),
-    name: String(source.name || '').trim(),
-    phone: String(source.phone || '').trim(),
-    email: String(source.email || '').trim(),
+    id: customer.id || createId('CLI'),
+    name: String(customer.name || '').trim(),
+    phone: String(customer.phone || '').trim(),
+    email: String(customer.email || '').trim(),
   };
 }
 
